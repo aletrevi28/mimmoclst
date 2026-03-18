@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MIMMOCLST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--k:#0a0a0a;--w:#f5f5f5;--b:1px solid #0a0a0a;--g:#888}
+    html{scroll-behavior:smooth}
+    body{font-family:'Archivo',sans-serif;background:var(--w);color:var(--k);font-size:13px;letter-spacing:.04em}
+
+    header{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--w);border-bottom:var(--b);display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px}
+    .logo{font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;text-decoration:none;color:var(--k)}
+    nav{display:flex}
+    nav a{text-decoration:none;color:var(--k);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:0 18px;height:48px;display:flex;align-items:center;border-left:var(--b);transition:background .15s,color .15s}
+    nav a:hover,nav a.active{background:var(--k);color:var(--w)}
+
+    .hero{margin-top:48px;border-bottom:var(--b);padding:72px 24px 56px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end}
+    .hero-title{font-size:clamp(44px,8vw,96px);font-weight:900;line-height:.92;text-transform:uppercase;letter-spacing:-.02em}
+    .hero-title span{display:block}
+    .hero-meta p{font-size:12px;color:var(--g);line-height:1.9;text-transform:uppercase;letter-spacing:.08em}
+    .hero-meta strong{color:var(--k);font-weight:700}
+    .hero-tag{display:inline-block;border:var(--b);padding:4px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:18px}
+
+    .sec-hdr{border-bottom:var(--b);padding:0 24px;height:40px;display:flex;align-items:center;justify-content:space-between}
+    .sec-hdr h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.14em}
+    .sec-hdr span{font-size:11px;color:var(--g)}
+
+    .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));border-left:var(--b)}
+    .item{border-right:var(--b);border-bottom:var(--b);cursor:pointer;position:relative;overflow:hidden;aspect-ratio:3/4;background:#fff}
+    .item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease;mix-blend-mode:multiply}
+    .item:hover img{transform:scale(1.04)}
+    .item-overlay{position:absolute;bottom:0;left:0;right:0;background:var(--w);border-top:var(--b);padding:10px 12px;transform:translateY(100%);transition:transform .25s ease}
+    .item:hover .item-overlay{transform:translateY(0)}
+    .item-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+    .item-sub{font-size:10px;color:var(--g);margin-top:3px;letter-spacing:.05em}
+    .badge{position:absolute;top:10px;left:10px;color:var(--w);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 7px}
+    .badge.sold{background:#555}
+    .badge.nfs{background:var(--k)}
+
+    .lb{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,10,10,.96);align-items:center;justify-content:center;padding:24px}
+    .lb.open{display:flex}
+    .lb-inner{position:relative;max-width:520px;width:100%}
+    .lb-img{width:100%;max-height:78vh;object-fit:contain;display:block}
+    .lb-info{margin-top:14px;border-top:1px solid #333;padding-top:12px;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+    .lb-info h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#fff}
+    .lb-status{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 8px;border:1px solid #555;color:#aaa;white-space:nowrap}
+    .lb-close{position:absolute;top:-40px;right:0;background:none;border:1px solid #555;color:#fff;font-family:'Archivo',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:6px 14px;cursor:pointer}
+    .lb-prev,.lb-next{position:absolute;top:40%;transform:translateY(-50%);background:none;border:1px solid #555;color:#fff;font-family:'Archivo',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer}
+    .lb-prev{left:-58px}.lb-next{right:-58px}
+    .lb-dots{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    .lb-dot{width:6px;height:6px;border-radius:50%;background:#444;cursor:pointer;transition:background .2s}
+    .lb-dot.active{background:#fff}
+
+    footer{border-top:var(--b);display:grid;grid-template-columns:1fr 1fr 1fr;height:48px}
+    footer div{display:flex;align-items:center;padding:0 24px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g);border-right:var(--b)}
+    footer a{color:var(--k);text-decoration:none}
+    footer a:hover{text-decoration:underline}
+
+    @media(max-width:640px){
+      .hero{grid-template-columns:1fr;gap:20px;padding:44px 16px 32px}
+      .gallery{grid-template-columns:repeat(2,1fr)}
+      .lb-prev,.lb-next{display:none}
+      footer{grid-template-columns:1fr;height:auto}
+      footer div{height:40px;border-right:none;border-bottom:var(--b)}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">MIMMOCLST</a>
+  <nav>
+    <a href="#" class="active" data-view="all">All</a>
+    <a href="#" data-view="archive">Archive</a>
+    <a href="#" data-view="made">Homemade</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div>
+    <h1 class="hero-title"><span>MIMMO</span><span>CLST</span></h1>
+  </div>
+  <div class="hero-meta">
+    <p><strong>Curated by Alessandro Trevisan</strong></p>
+    <p>Based in Italy</p>
+    <div class="hero-tag">@mimmoclst</div>
+  </div>
+</section>
+
+<div id="archive-section">
+  <div class="sec-hdr"><h2>Archive</h2><span id="archive-count"></span></div>
+  <div class="gallery" id="gal-archive"></div>
+</div>
+
+<div id="made-section">
+  <div class="sec-hdr"><h2>Homemade</h2><span id="made-count"></span></div>
+  <div class="gallery" id="gal-made"></div>
+</div>
+
+<div class="lb" id="lb">
+  <div class="lb-inner">
+    <button class="lb-close" id="lb-close">Close ✕</button>
+    <button class="lb-prev" id="lb-prev">←</button>
+    <button class="lb-next" id="lb-next">→</button>
+    <img class="lb-img" id="lb-img" src="" alt="">
+    <div class="lb-dots" id="lb-dots"></div>
+    <div class="lb-info">
+      <h3 id="lb-title"></h3>
+      <div class="lb-status" id="lb-status"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div><a href="https://instagram.com/mimmoclst" target="_blank">@mimmoclst</a></div>
+  <div>Curated by Alessandro Trevisan</div>
+  <div>Italy</div>
+</footer>
+
+<script>
+const ITEMS = [
+  {
+    "section": "archive",
+    "title": "Early 2000s Martin Margiela 5 zip waxed cotton jacket",
+    "desc": "Size 50 — Brown",
+    "status": "",
+    "cover": "img/archive/2026-03-05_13-03-18_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-03-05_13-03-18_UTC_1.jpg",
+      "img/archive/2026-03-05_13-03-18_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Late 2000s Maison Martin Margiela 5 zip leather jacket",
+    "desc": "Size 48",
+    "status": "",
+    "cover": "img/archive/2026-02-27_13-27-35_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-02-27_13-27-35_UTC_1.jpg",
+      "img/archive/2026-02-27_13-27-35_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Reconstructed jeans",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2026-02-24_19-11-47_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-24_19-11-47_UTC_1.jpg",
+      "img/made/2026-02-24_19-11-47_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Reconstructed longsleeve",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2026-02-24_17-24-01_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-24_17-24-01_UTC_1.jpg",
+      "img/made/2026-02-24_17-24-01_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Reconstructed wool longsleeve",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2026-02-22_09-46-14_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-22_09-46-14_UTC_1.jpg",
+      "img/made/2026-02-22_09-46-14_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2000s Martin Margiela line 0 artisanal padded shirt",
+    "desc": "Size M",
+    "status": "SOLD",
+    "cover": "img/archive/2026-02-13_11-19-54_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-02-13_11-19-54_UTC_1.jpg",
+      "img/archive/2026-02-13_11-19-54_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Scab jeans",
+    "desc": "Size W40cm L110cm (adjustable)",
+    "status": "",
+    "cover": "img/made/2026-02-13_11-18-01_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-13_11-18-01_UTC_1.jpg",
+      "img/made/2026-02-13_11-18-01_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Cargo trousers",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2026-02-13_11-07-15_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-13_11-07-15_UTC_1.jpg",
+      "img/made/2026-02-13_11-07-15_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Comme Des Garçons patchwork wool sweater/longsleeve",
+    "desc": "Size S but fits like a M",
+    "status": "SOLD",
+    "cover": "img/archive/2026-02-10_19-38-25_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-02-10_19-38-25_UTC_1.jpg",
+      "img/archive/2026-02-10_19-38-25_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1998 Helmut Lang anorak",
+    "desc": "Size 42",
+    "status": "SOLD",
+    "cover": "img/archive/2026-02-05_13-35-46_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-02-05_13-35-46_UTC_1.jpg",
+      "img/archive/2026-02-05_13-35-46_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Denim trousers",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2026-02-03_13-35-32_UTC_1.jpg",
+    "images": [
+      "img/made/2026-02-03_13-35-32_UTC_1.jpg",
+      "img/made/2026-02-03_13-35-32_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "German army bomber",
+    "desc": "",
+    "status": "SOLD",
+    "cover": "img/archive/2026-01-11_08-36-14_UTC_1.jpg",
+    "images": [
+      "img/archive/2026-01-11_08-36-14_UTC_1.jpg",
+      "img/archive/2026-01-11_08-36-14_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "90s wool bomber",
+    "desc": "Raf vibes — Riri zip",
+    "status": "SOLD",
+    "cover": "img/archive/2025-12-26_11-28-08_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-12-26_11-28-08_UTC_1.jpg",
+      "img/archive/2025-12-26_11-28-08_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2000 Alpha Industries reworked bomber",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-12-20_15-16-22_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-12-20_15-16-22_UTC_1.jpg",
+      "img/archive/2025-12-20_15-16-22_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2003 Martin Margiela v-neck sweater by Miss Deanna",
+    "desc": "Deep blue/black — Size L",
+    "status": "SOLD",
+    "cover": "img/archive/2025-12-14_14-11-36_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-12-14_14-11-36_UTC_1.jpg",
+      "img/archive/2025-12-14_14-11-36_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Vintage 90s double zip sweater",
+    "desc": "Similar to the Margiela one — 100% wool — Size L",
+    "status": "",
+    "cover": "img/archive/2025-12-14_14-09-25_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-12-14_14-09-25_UTC_1.jpg",
+      "img/archive/2025-12-14_14-09-25_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Repro - Raf Simons 1999 wool trousers",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-12-07_10-34-28_UTC_1.jpg",
+    "images": [
+      "img/made/2025-12-07_10-34-28_UTC_1.jpg",
+      "img/made/2025-12-07_10-34-28_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Helmut Lang 2000 classic denim jacket, size 42",
+    "desc": "",
+    "status": "",
+    "cover": "img/archive/2025-12-07_09-45-19_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-12-07_09-45-19_UTC_1.jpg",
+      "img/archive/2025-12-07_09-45-19_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Sleeveless shirt, raw cut",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-12-07_09-39-47_UTC_1.jpg",
+    "images": [
+      "img/made/2025-12-07_09-39-47_UTC_1.jpg",
+      "img/made/2025-12-07_09-39-47_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Shirt, slim fit, raw cut",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-12-07_09-39-07_UTC_1.jpg",
+    "images": [
+      "img/made/2025-12-07_09-39-07_UTC_1.jpg",
+      "img/made/2025-12-07_09-39-07_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Shirt, oversized fit, asymmetric cut",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-12-07_09-37-21_UTC_1.jpg",
+    "images": [
+      "img/made/2025-12-07_09-37-21_UTC_1.jpg",
+      "img/made/2025-12-07_09-37-21_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "Cargo shorts",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-10-17_12-26-54_UTC_1.jpg",
+    "images": [
+      "img/made/2025-10-17_12-26-54_UTC_1.jpg",
+      "img/made/2025-10-17_12-26-54_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "made",
+    "title": "TankTop",
+    "desc": "",
+    "status": "",
+    "cover": "img/made/2025-10-17_12-25-41_UTC_1.jpg",
+    "images": [
+      "img/made/2025-10-17_12-25-41_UTC_1.jpg",
+      "img/made/2025-10-17_12-25-41_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "S/S 2003 D&G cargo pants",
+    "desc": "Size 42",
+    "status": "SOLD",
+    "cover": "img/archive/2025-10-17_12-23-42_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-10-17_12-23-42_UTC_1.jpg",
+      "img/archive/2025-10-17_12-23-42_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1970s USAF N2B Bomber",
+    "desc": "Size M — Coyote fur, wool filling",
+    "status": "SOLD",
+    "cover": "img/archive/2025-10-10_07-12-10_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-10-10_07-12-10_UTC_1.jpg",
+      "img/archive/2025-10-10_07-12-10_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1940s French workpants",
+    "desc": "Size 30",
+    "status": "",
+    "cover": "img/archive/2025-10-10_07-10-53_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-10-10_07-10-53_UTC_1.jpg",
+      "img/archive/2025-10-10_07-10-53_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2x 2000 Helmut Lang tank top",
+    "desc": "Size S — With tags",
+    "status": "",
+    "cover": "img/archive/2025-10-10_07-09-40_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-10-10_07-09-40_UTC_1.jpg",
+      "img/archive/2025-10-10_07-09-40_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2000 Helmut Lang astro jacket",
+    "desc": "Size 42 — New — No hood",
+    "status": "SOLD",
+    "cover": "img/archive/2025-10-07_06-59-51_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-10-07_06-59-51_UTC_1.jpg",
+      "img/archive/2025-10-07_06-59-51_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1999 Helmut Lang classic cut jeans",
+    "desc": "Size 28",
+    "status": "SOLD",
+    "cover": "img/archive/2025-09-03_11-13-41_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-09-03_11-13-41_UTC_1.jpg",
+      "img/archive/2025-09-03_11-13-41_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1960s German army u-boat uniform",
+    "desc": "",
+    "status": "",
+    "cover": "img/archive/2025-09-03_07-19-17_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-09-03_07-19-17_UTC_1.jpg",
+      "img/archive/2025-09-03_07-19-17_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2023 Junya Watanabe cargos",
+    "desc": "Size M",
+    "status": "SOLD",
+    "cover": "img/archive/2025-08-15_08-39-02_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-15_08-39-02_UTC_1.jpg",
+      "img/archive/2025-08-15_08-39-02_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2000s D&G tank top",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-08-15_08-32-26_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-15_08-32-26_UTC_1.jpg",
+      "img/archive/2025-08-15_08-32-26_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Yohji Yamamoto + Noir asymmetric shirt",
+    "desc": "",
+    "status": "SOLD",
+    "cover": "img/archive/2025-08-13_09-53-05_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-13_09-53-05_UTC_1.jpg",
+      "img/archive/2025-08-13_09-53-05_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "late 2000s Rick Owens suede leather combat boots",
+    "desc": "size 39",
+    "status": "SOLD",
+    "cover": "img/archive/2025-08-12_13-15-57_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-12_13-15-57_UTC_1.jpg",
+      "img/archive/2025-08-12_13-15-57_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "90s Michiko Koshino shirt",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-08-09_09-06-49_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-09_09-06-49_UTC_1.jpg",
+      "img/archive/2025-08-09_09-06-49_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2000s Maison Martin Margiela 6 trousers",
+    "desc": "size 44",
+    "status": "NFS",
+    "cover": "img/archive/2025-08-09_07-53-25_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-09_07-53-25_UTC_1.jpg",
+      "img/archive/2025-08-09_07-53-25_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "S/S 2000 Helmut Lang jacket",
+    "desc": "size 50",
+    "status": "SOLD",
+    "cover": "img/archive/2025-08-09_07-47-14_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-08-09_07-47-14_UTC_1.jpg",
+      "img/archive/2025-08-09_07-47-14_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "CDG Homme Plus zipper tee",
+    "desc": "",
+    "status": "SOLD",
+    "cover": "img/archive/2025-06-22_09-05-39_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-06-22_09-05-39_UTC_1.jpg",
+      "img/archive/2025-06-22_09-05-39_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1970s African V-Neck cargo shirt from Johannesburg",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-02-22_16-37-44_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-02-22_16-37-44_UTC_1.jpg",
+      "img/archive/2025-02-22_16-37-44_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1970s Rumenian carnival women vest",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-02-22_16-32-44_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-02-22_16-32-44_UTC_1.jpg",
+      "img/archive/2025-02-22_16-32-44_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1970s Rumenian carnival men vest",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2025-02-22_16-32-15_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-02-22_16-32-15_UTC_1.jpg",
+      "img/archive/2025-02-22_16-32-15_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "2002 Oakley Splice FMJ Crystal Black Ice Iridium",
+    "desc": "",
+    "status": "SOLD",
+    "cover": "img/archive/2025-01-18_13-41-19_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-01-18_13-41-19_UTC_1.jpg",
+      "img/archive/2025-01-18_13-41-19_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "S/S 2003 D&G full zipped cargo pants",
+    "desc": "Size 38",
+    "status": "SOLD",
+    "cover": "img/archive/2025-01-18_13-36-13_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-01-18_13-36-13_UTC_1.jpg",
+      "img/archive/2025-01-18_13-36-13_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1950s M51 cargo pants",
+    "desc": "Korea/Vietnam war",
+    "status": "",
+    "cover": "img/archive/2025-01-10_12-26-47_UTC_1.jpg",
+    "images": [
+      "img/archive/2025-01-10_12-26-47_UTC_1.jpg",
+      "img/archive/2025-01-10_12-26-47_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Zero Defect \"Italian Denim Image\" vintage jeans",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2024-10-29_10-08-30_UTC_1.jpg",
+    "images": [
+      "img/archive/2024-10-29_10-08-30_UTC_1.jpg",
+      "img/archive/2024-10-29_10-08-30_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "De Niro Taxi Driver pins set",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2024-07-16_17-23-25_UTC_1.jpg",
+    "images": [
+      "img/archive/2024-07-16_17-23-25_UTC_1.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "Gialí padded denim biker jacket",
+    "desc": "size : XL — This jacket was found by , worn by Ye in 2021 at the Larry Hoover concert and was also reproduced on the Yzy Gap engineered by Balenciaga collection",
+    "status": "SOLD",
+    "cover": "img/archive/2024-07-06_10-08-48_UTC_1.jpg",
+    "images": [
+      "img/archive/2024-07-06_10-08-48_UTC_1.jpg",
+      "img/archive/2024-07-06_10-08-48_UTC_2.jpg"
+    ]
+  },
+  {
+    "section": "archive",
+    "title": "1970s Ciao varsity jacket",
+    "desc": "",
+    "status": "NFS",
+    "cover": "img/archive/2024-03-30_15-33-29_UTC_1.jpg",
+    "images": [
+      "img/archive/2024-03-30_15-33-29_UTC_1.jpg",
+      "img/archive/2024-03-30_15-33-29_UTC_2.jpg"
+    ]
+  }
+];
+let currentView = 'all', lbIdx = 0, lbImgIdx = 0;
+
+function build() {
+  const gA = document.getElementById('gal-archive');
+  const gM = document.getElementById('gal-made');
+  gA.innerHTML = ''; gM.innerHTML = '';
+  ITEMS.forEach((item, idx) => {
+    if (currentView !== 'all' && item.section !== currentView) return;
+    const el = document.createElement('div');
+    el.className = 'item';
+    let badge = '';
+    if (item.status === 'SOLD') badge = '<div class="badge sold">Sold</div>';
+    else if (item.status === 'NFS') badge = '<div class="badge nfs">NFS</div>';
+    el.innerHTML = badge + `<img src="${item.cover}" alt="${item.title}" loading="lazy">
+      <div class="item-overlay">
+        <div class="item-label">${item.title}</div>
+        ${item.desc ? '<div class="item-sub">'+item.desc+'</div>' : ''}
+      </div>`;
+    el.addEventListener('click', () => openLb(idx));
+    (item.section === 'archive' ? gA : gM).appendChild(el);
+  });
+  document.getElementById('archive-count').textContent = ITEMS.filter(i=>i.section==='archive').length + ' pieces';
+  document.getElementById('made-count').textContent    = ITEMS.filter(i=>i.section==='made').length + ' pieces';
+}
+
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    currentView = a.dataset.view;
+    document.querySelectorAll('nav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    document.getElementById('archive-section').style.display = currentView==='made' ? 'none' : '';
+    document.getElementById('made-section').style.display    = currentView==='archive' ? 'none' : '';
+    build();
+    if (currentView !== 'all') document.getElementById(currentView==='archive'?'archive-section':'made-section').scrollIntoView({behavior:'smooth'});
+  });
+});
+
+function openLb(idx) { lbIdx=idx; lbImgIdx=0; updateLb(); document.getElementById('lb').classList.add('open'); }
+function updateLb() {
+  const item = ITEMS[lbIdx];
+  lbImgIdx = Math.min(lbImgIdx, item.images.length-1);
+  document.getElementById('lb-img').src = item.images[lbImgIdx];
+  document.getElementById('lb-title').textContent = item.title;
+  const st = document.getElementById('lb-status');
+  st.textContent = item.status; st.style.display = item.status ? '' : 'none';
+  const dots = document.getElementById('lb-dots');
+  dots.innerHTML = '';
+  if (item.images.length > 1) {
+    item.images.forEach((_,i) => {
+      const d = document.createElement('div');
+      d.className = 'lb-dot'+(i===lbImgIdx?' active':'');
+      d.addEventListener('click', ()=>{ lbImgIdx=i; updateLb(); });
+      dots.appendChild(d);
+    });
+  }
+}
+
+document.getElementById('lb-close').addEventListener('click', ()=>document.getElementById('lb').classList.remove('open'));
+document.getElementById('lb-prev').addEventListener('click', ()=>{ lbIdx=(lbIdx-1+ITEMS.length)%ITEMS.length; lbImgIdx=0; updateLb(); });
+document.getElementById('lb-next').addEventListener('click', ()=>{ lbIdx=(lbIdx+1)%ITEMS.length; lbImgIdx=0; updateLb(); });
+document.getElementById('lb').addEventListener('click', e=>{ if(e.target===document.getElementById('lb')) document.getElementById('lb').classList.remove('open'); });
+document.addEventListener('keydown', e=>{
+  const lb=document.getElementById('lb');
+  if(!lb.classList.contains('open')) return;
+  if(e.key==='Escape') lb.classList.remove('open');
+  if(e.key==='ArrowLeft')  { lbIdx=(lbIdx-1+ITEMS.length)%ITEMS.length; lbImgIdx=0; updateLb(); }
+  if(e.key==='ArrowRight') { lbIdx=(lbIdx+1)%ITEMS.length; lbImgIdx=0; updateLb(); }
+});
+
+build();
+</script>
+</body>
+</html>
