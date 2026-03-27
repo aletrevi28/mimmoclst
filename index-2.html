@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MIMMOCLST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #000000;
+      --white: #f2f2f2;
+      --gray-1: #111111;
+      --gray-2: #222222;
+      --gray-3: #444444;
+      --gray-4: #666666;
+      --gray-5: #999999;
+      --font: 'IBM Plex Mono', monospace;
+      --font-alt: 'Share Tech Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font);
+      font-weight: 300;
+      font-size: 13px;
+      overflow-x: hidden;
+      cursor: crosshair;
+      min-height: 100vh;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px);
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* HERO */
+    .hero {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      border-bottom: 1px solid var(--gray-2);
+    }
+    .hero-main {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 3rem 2rem 2rem;
+    }
+    .hero-headline {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      flex-wrap: nowrap;
+    }
+    .hero-title {
+      font-family: var(--font-alt);
+      font-size: clamp(1.8rem, 5vw, 5rem);
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: 0.06em;
+      color: var(--gray-3);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .hero-by {
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--gray-4);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .hero-meta {
+      display: grid;
+      grid-template-columns: 1fr;
+      border-top: 1px solid var(--gray-2);
+    }
+    .hero-meta-item {
+      padding: 1.5rem 2rem;
+    }
+    .meta-label {
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      color: var(--gray-4);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .meta-value {
+      font-size: 12px;
+      color: var(--gray-5);
+      letter-spacing: 0.05em;
+    }
+
+    /* GALLERY */
+    .gallery {
+      padding: 4rem 2rem 6rem;
+      position: relative;
+      min-height: 100vh;
+    }
+    .gallery-inner {
+      position: relative;
+      width: 100%;
+    }
+    .gallery-item {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s ease, z-index 0s;
+      transform-origin: center center;
+    }
+    .gallery-item:hover {
+      z-index: 50 !important;
+      transform: rotate(0deg) scale(1.04) !important;
+    }
+    .gallery-item img {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: grayscale(8%);
+      transition: filter 0.2s ease;
+    }
+    .gallery-item:hover img {
+      filter: grayscale(0%);
+    }
+
+    /* LIGHTBOX */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.93);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      cursor: default;
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 1.5rem;
+      right: 2rem;
+      font-family: var(--font);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--gray-4);
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .lightbox-close:hover { color: var(--white); }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: clamp(1.6rem, 8vw, 4rem); }
+      .gallery { padding: 2rem 1rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <div class="hero" id="home">
+    <div class="hero-main">
+      <div class="hero-headline">
+        <h1 class="hero-title">MIMMOCLST</h1>
+        <p class="hero-by">by Alessandro Trevisan</p>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <div class="meta-label">Based in</div>
+        <div class="meta-value">Italy</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <section class="gallery" id="gallery">
+    <div class="gallery-inner" id="galleryInner"></div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lbClose">[close]</span>
+    <img id="lbImg" src="" alt="" />
+  </div>
+
+  <script>
+const IMAGES = [];
+
+    const container = document.getElementById("galleryInner");
+    const lightbox = document.getElementById("lightbox");
+    const lbImg = document.getElementById("lbImg");
+    const lbClose = document.getElementById("lbClose");
+
+    // Shuffle
+    const shuffled = [...IMAGES].sort(() => Math.random() - 0.5);
+
+    // Layout params
+    const colCount = window.innerWidth < 600 ? 2 : window.innerWidth < 900 ? 3 : 4;
+    const containerWidth = container.offsetWidth || window.innerWidth - 40;
+    const colW = containerWidth / colCount;
+    const colHeights = new Array(colCount).fill(40);
+    const items = [];
+
+    shuffled.forEach((img, i) => {
+      const div = document.createElement("div");
+      div.className = "gallery-item";
+
+      // Random rotation -7 to +7 deg
+      const rot = (Math.random() * 14 - 7).toFixed(2);
+      // Random width within column
+      const wFactor = 0.62 + Math.random() * 0.3;
+      const w = Math.round(colW * wFactor);
+      const col = colHeights.indexOf(Math.min(...colHeights));
+      const x = col * colW + (Math.random() * colW * 0.2);
+      const y = colHeights[col];
+      const zIndex = Math.floor(Math.random() * 20) + 1;
+
+      div.style.cssText = `
+        left: ${x}px;
+        top: ${y}px;
+        width: ${w}px;
+        transform: rotate(${rot}deg);
+        z-index: ${zIndex};
+      `;
+
+      const imgEl = document.createElement("img");
+      imgEl.src = img.src;
+      imgEl.loading = "lazy";
+      div.appendChild(imgEl);
+
+      div.addEventListener("click", () => {
+        lbImg.src = img.src;
+        lightbox.classList.add("open");
+      });
+
+      container.appendChild(div);
+
+      // Estimate height (assume ~4:3 portrait)
+      const estH = w * 1.33 + 20;
+      colHeights[col] += estH;
+      items.push({ div, col, estH });
+    });
+
+    // Set container height
+    container.style.height = Math.max(...colHeights) + "px";
+
+    // Lightbox close
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) lightbox.classList.remove("open");
+    });
+    lbClose.addEventListener("click", () => lightbox.classList.remove("open"));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") lightbox.classList.remove("open");
+    });
+  </script>
+</body>
+</html>
